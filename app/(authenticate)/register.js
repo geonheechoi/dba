@@ -1,13 +1,53 @@
-import { StyleSheet, Text, View ,SafeAreaView,Image,Pressable,TextInput,KeyboardAvoidingView} from 'react-native'
-import React ,{useState}from 'react'
-import { MaterialIcons } from "@expo/vector-icons";
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Image,
+  Pressable,
+  TextInput,
+  KeyboardAvoidingView,
+  Alert,
+} from "react-native";
+import React, { useState } from "react";
+import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import axios from "axios";
+
 const register = () => {
-  const [namem, setName] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const handleRegister = () => {
+    const user = {
+      name: name,
+      email: email,
+      password: password,
+    };
+
+    // send a POST  request to the backend API to register the user
+    axios
+      .post("http://192.168.219.102:3000/register", user)
+      .then((response) => {
+        console.log(response);
+        Alert.alert(
+          "Registration successful",
+          "You have been registered Successfully"
+        );
+        setName("");
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        Alert.alert(
+          "Registration Error",
+          "An error occurred while registering"
+        );
+        console.log("registration failed", error);
+      });
+  };
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "white", alignItems: "center" }}
@@ -32,12 +72,13 @@ const register = () => {
             marginTop: 20,
             textAlign: "center",
             fontSize: 20,
-            fontFamily: "sans-serif",
+            fontFamily: "GillSans-SemiBold",
           }}
         >
           Match Mate
         </Text>
       </View>
+
       <KeyboardAvoidingView>
         <View style={{ alignItems: "center" }}>
           <Text
@@ -48,9 +89,10 @@ const register = () => {
               color: "#F9629F",
             }}
           >
-            register to your account
+            Register to your Account
           </Text>
         </View>
+
         <View
           style={{
             justifyContent: "center",
@@ -59,13 +101,45 @@ const register = () => {
           }}
         >
           <Image
-            style={{ width: 100, height: 100, resizeMode: "cover" }}
+            style={{ width: 100, height: 80, resizeMode: "cover" }}
             source={{
               uri: "https://cdn-icons-png.flaticon.com/128/2509/2509078.png",
             }}
           />
         </View>
+
         <View style={{ marginTop: 20 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+              backgroundColor: "#FFC0CB",
+              paddingVertical: 5,
+              borderRadius: 5,
+              marginTop: 30,
+            }}
+          >
+            <Ionicons
+              style={{ marginLeft: 8 }}
+              name="person-sharp"
+              size={24}
+              color="white"
+            />
+            <TextInput
+              value={name}
+              onChangeText={(text) => setName(text)}
+              placeholder="Enter your name"
+              placeholderTextColor={"white"}
+              style={{
+                color: "white",
+                marginVertical: 10,
+                width: 300,
+                fontSize: name ? 17 : 17,
+              }}
+            />
+          </View>
+
           <View
             style={{
               flexDirection: "row",
@@ -96,6 +170,7 @@ const register = () => {
               }}
             />
           </View>
+
           <View style={{}}>
             <View
               style={{
@@ -115,7 +190,7 @@ const register = () => {
                 color="white"
               />
               <TextInput
-                password={password}
+                value={password}
                 onChangeText={(text) => setPassword(text)}
                 secureTextEntry={true}
                 placeholder="Enter your password"
@@ -129,22 +204,11 @@ const register = () => {
               />
             </View>
           </View>
-          <View
-            style={{
-              marginTop: 12,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text>Keep me logged in</Text>
-            <Text style={{ color: "#007FFF", fontWeight: "500" }}>
-              Forgot Password
-            </Text>
-          </View>
+
           <View style={{ marginTop: 50 }} />
 
           <Pressable
+            onPress={handleRegister}
             style={{
               width: 200,
               backgroundColor: "#FFC0CB",
@@ -165,17 +229,21 @@ const register = () => {
               Register
             </Text>
           </Pressable>
-          <Pressable onPress= {()=>router.replace("/login")}style={{ marginTop: 12 }}>
+
+          <Pressable
+            onPress={() => router.replace("/login")}
+            style={{ marginTop: 12 }}
+          >
             <Text style={{ textAlign: "center", color: "gray", fontSize: 16 }}>
-              Already have an account? Login
+              Already have an account? Sign In
             </Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default register
+export default register;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

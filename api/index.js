@@ -1,5 +1,5 @@
 const express =require('express');
-const bpdyParser = require('body-parser');
+const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
@@ -10,8 +10,8 @@ const cors=require('cors');
 
 app.use(cors());
 
-app.use(bpdyParser.urlencoded({extended:false}));
-app.use(bpdyParser.json());
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
 
 const jwt = require('jsonwebtoken');
 
@@ -28,7 +28,7 @@ app.listen(port,()=>{
 
 //end point for user registration
 
-app.post('/register',(req,res)=>{
+app.post('/register',async(req,res)=>{
     try{
         const {name,email,password} = req.body;
 
@@ -59,12 +59,12 @@ app.post('/register',(req,res)=>{
 
 })
 
-const sendVertificationEmail = (email,vertificationToken)=>{
+const sendVertificationEmail = async (email,vertificationToken)=>{
     const transpoter = nodemailer.createTransport({
         service:'gmail',
         auth:{
             user:"fear5579@gmail.com",
-            pass:"cfym oqzp veko eaic",
+            pass:"cfymoqzpvekoeaic",
         }
     })
 
@@ -75,6 +75,12 @@ const sendVertificationEmail = (email,vertificationToken)=>{
         text:`Please click on the link below to vertify your email : http://192.168.219.102:3000/vertify-email/${vertificationToken}`
 
    };
+   try{
+    await transpoter.sendMail(mailOptions);
+   }catch(e){
+    console.log("error to send vertification email")
+   }
    
 
 };
+
