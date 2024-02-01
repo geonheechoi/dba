@@ -1,86 +1,80 @@
-const express = require('express');
-const bodyParser = require('body-parser'); // Corrected the variable name
+const express =require('express');
+const bpdyParser = require('body-parser');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const port = 3000;
-const cors = require('cors');
+const port =3000;
+const cors=require('cors');
 
 app.use(cors());
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bpdyParser.urlencoded({extended:false}));
+app.use(bpdyParser.json());
 
 const jwt = require('jsonwebtoken');
 
-mongoose
-  .connect('mongodb+srv://geonheechoi:geonheechoi@cluster0.7ck5gen.mongodb.net/', {
-    useNewUrlParser: true, // Added this option to avoid deprecation warning
-    useUnifiedTopology: true, // Added this option to avoid deprecation warning
-  })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((e) => {
-    console.log('Error while connecting to MongoDB');
-  });
+mongoose.connect("mongodb+srv://geonheechoi:geonheechoi@cluster0.7ck5gen.mongodb.net/").then(()=>{
 
-app.listen(port, () => {
-  console.log('Server is running on port ' + port);
-});
+    console.log("connected to mongoDB");
+}).catch((e)=>{
+    console.log("error while connecting to mongoDB");
+})
 
-// Endpoint for user registration
+app.listen(port,()=>{
+    console.log("server is running on port "+port);
+})
 
-app.post('/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+//end point for user registration
 
-    // Check if email already exists
-    const existingUser = await User.findOne({ email }); // You need to import the User model
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+app.post('/register',(req,res)=>{
+    try{
+        const {name,email,password} = req.body;
+
+        //check if email alewady exists
+        const existingUser = await User.findOne({email});
+        if(existingUser){
+            return res.status(400).json({message:"User already exists"});
+        }
+
+        //create a new user
+        const newUser =new User({
+            name,
+            email,
+            password
+        })
+
+        newUser.vertificationToken = crypto.randomBytes(64).toString('hex');
+
+        await newUser.save();
+
+        sendVertificationEmail(newUser.email,newUser.vertificationToken)
+
+    }catch(e){
+        console.log(e,"error while registering new user");
+        res.status(500).json({message:"Registration failed"});
     }
 
-    // Create a new user
-    const newUser = new User({
-      name,
-      email,
-      password,
-    });
 
-    newUser.vertificationToken = crypto.randomBytes(20).toString('hex');
+})
 
-    await newUser.save();
+const sendVertificationEmail = (email,vertificationToken)=>{
+    const transpoter = nodemailer.createTransport({
+        service:'gmail',
+        auth:{
+            user:"fear5579@gmail.com",
+            pass:"cfym oqzp veko eaic",
+        }
+    })
 
-    sendVertificationEmail(newUser.email, newUser.vertificationToken);
-    res.status(200).json({ message: 'User registered successfully', userId: newUser._id });
-  } catch (e) {
-    console.log(e, 'Error while registering new user');
-    res.status(500).json({ message: 'Registration failed' });
-  }
-});
+    const mailOptions = {
+        from:"matchmake.com",
+        to:email,
+        subject:"Email vertification",
+        text:`Please click on the link below to vertify your email : http://192.168.219.102:3000/vertify-email/${vertificationToken}`
 
-const sendVertificationEmail = async (email, vertificationToken) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'fear5579@gmail.com',
-      pass: 'cfymoqzpvekoeaic',
-    },
-  });
+   };
+   
 
-  const mailOptions = {
-    from: 'matchmake.com',
-    to: email,
-    subject: 'Email verification',
-    text: `Please click on the link below to verify your email: http://192.168.219.102:3000/verify-email/${vertificationToken}`,
-  };
-  // Send the mail
-  try {
-    await transporter.sendMail(mailOptions);
-  } catch (e) {
-    console.log(e, 'Error while sending email');
-  }
 };
