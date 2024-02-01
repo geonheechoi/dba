@@ -28,7 +28,7 @@ app.listen(port,()=>{
 
 //end point for user registration
 
-app.post('/register',async (req,res)=>{
+app.post('/register',(req,res)=>{
     try{
         const {name,email,password} = req.body;
 
