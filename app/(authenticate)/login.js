@@ -7,15 +7,49 @@ import {
   KeyboardAvoidingView,
   TextInput,
   Pressable,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-const Login = () => {
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  /*
+  const handleLogin = () => {
+    const user ={
+      email: email,
+      password: password,
+    };
+    //router.push("/(authenticate)/select")
+       axios.post("http://192.168.219.103:3000/login", user).then((response) => {
+       console.log(response);
+       const token = response.data.token;
+       AsyncStorage.setItem("auth", token);
+       router.replace("/(authenticate)/select")
+
+  })
+};
+*/
+const handleLogin = () => {
+  const user = { email, password };
+  axios.post("http://192.168.219.103:3000/login", user)
+    .then(response => {
+      console.log("Login response:", response);
+      const token = response.data.token;
+      AsyncStorage.setItem("auth", token);
+      router.replace("/(authenticate)/select");
+    })
+    .catch(error => {
+      console.error("Login error:", error.response);
+      // Handle error (show alert, etc.)
+      Alert.alert("Login failed", "Invalid email or password");
+    });
+};
 
   return (
     <SafeAreaView
@@ -154,6 +188,7 @@ const Login = () => {
           <View style={{ marginTop: 50 }} />
 
           <Pressable
+          onPress={handleLogin}
             style={{
               width: 200,
               backgroundColor: "#FFC0CB",
@@ -185,6 +220,6 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default login;
 
 const styles = StyleSheet.create({});

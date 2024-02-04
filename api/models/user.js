@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema({
        type:Boolean,
        default:false,
    },
-   vertificationToken: String,
+   verificationToken: String,
    crushes:[{
        type:mongoose.Schema.Types.ObjectId,
        ref:"User",
