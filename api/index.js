@@ -80,7 +80,7 @@ const sendVerificationEmail = async (email,verificationToken)=>{
         from:"matchmake.com",
         to: email,
         subject:"Email vertification",
-        text:`Please click on the link below to vertify your email : http://192.168.219.103:3000/vertify/${verificationToken}`
+        text:`Please click on the link below to vertify your email : http://:3000/vertify/${verificationToken}`
 
    };
    try{
@@ -154,7 +154,7 @@ app.put("/users/:userId/gender", async (req, res) =>{
         const {userId} = req.params;
         const {gender} = req.body;
         
-        const user = await User.findByAndUpdate(
+        const user = await User.findByIdAndUpdate(
             userId,
             {gender:gender},
             {new:true}

@@ -14,11 +14,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const login = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  
   /*
   const handleLogin = () => {
     const user ={
@@ -35,21 +36,25 @@ const login = () => {
   })
 };
 */
-const handleLogin = () => {
-  const user = { email, password };
-  axios.post("http://192.168.219.103:3000/login", user)
-    .then(response => {
-      console.log("Login response:", response);
-      const token = response.data.token;
-      AsyncStorage.setItem("auth", token);
-      router.replace("/(authenticate)/select");
-    })
-    .catch(error => {
-      console.error("Login error:", error.response);
-      // Handle error (show alert, etc.)
-      Alert.alert("Login failed", "Invalid email or password");
-    });
-};
+  const handleLogin = () => {
+    const user = { 
+      email:email, 
+      password:password 
+    };
+    axios
+      .post("http://192.168.219.100:3000/login", user)
+      .then((response) => {
+        console.log("Login response:", response);
+        const token = response.data.token;
+        AsyncStorage.setItem("auth", token);
+        router.replace("/(authenticate)/select");
+      })
+      .catch((error) => {
+        console.error("Login error:", error.response);
+        // Handle error (show alert, etc.)
+        Alert.alert("Login failed", "Invalid email or password");
+      });
+  };
 
   return (
     <SafeAreaView
@@ -188,7 +193,7 @@ const handleLogin = () => {
           <View style={{ marginTop: 50 }} />
 
           <Pressable
-          onPress={handleLogin}
+            onPress={handleLogin}
             style={{
               width: 200,
               backgroundColor: "#FFC0CB",
@@ -209,7 +214,10 @@ const handleLogin = () => {
               Login
             </Text>
           </Pressable>
-          <Pressable onPress= {()=>router.replace("/register")}style={{ marginTop: 12 }}>
+          <Pressable
+            onPress={() => router.replace("/register")}
+            style={{ marginTop: 12 }}
+          >
             <Text style={{ textAlign: "center", color: "gray", fontSize: 16 }}>
               Do not have account? Sign up
             </Text>
