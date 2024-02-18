@@ -234,7 +234,28 @@ app.put("/users/:userId/turn-ons/add", async (req, res) => {
   }
 });
 
+// Endpoint to remove a turn-on for a user in the backend
+// Endpoint to remove a turn-on for a user in the hackedn
+app.put("/users/:userId/turn-ons/remove", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { turnOn } = req.body;
 
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { turnOns: turnOn } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Turn-on removed successfully", user });
+  } catch (error) {
+    return res.status(500).json({ message: "Error removing turn-on", error: error.message });
+  }
+});
 
   
 
