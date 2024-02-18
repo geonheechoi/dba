@@ -168,3 +168,73 @@ app.put("/users/:userId/gender", async (req, res) =>{
 
     }
 });
+
+//endpoint to update user descrtiption
+
+app.put("/users/:userId/description", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { description } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { description: description },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User description updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user", error: error.message });
+  }
+});
+
+
+//fetch users data
+app.get("/users/:userId",async (req, req) =>{
+  try{
+    const { userId } = req.params;
+
+    const user =await User.findById(userId);
+    if(!user){
+      return res.status(500).json({message:"User not found"});
+    }
+
+    return res.status(200).json({user});
+  }catch(error){
+    res.status(500).json({message:"Error fetching user details"})
+  }
+})
+
+
+
+//endpoint to add turnon for a user in the hackedn
+// Endpoint to add a turn-on for a user in the hackedn
+app.put("/users/:userId/turn-ons/add", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { turnOn } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { turnOns: turnOn } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Turn-on added successfully", user });
+  } catch (error) {
+    return res.status(500).json({ message: "Error adding turn-on" });
+  }
+});
+
+
+
+  
+
