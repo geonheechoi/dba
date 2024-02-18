@@ -19,6 +19,21 @@ const login = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  useEffect(() => {
+    const checkingStatus = async () => {
+      // Your async logic here
+      try{
+        const token = await AsyncStorage.getItem("auth");
+        if(token){
+          router.replace("/(tabs)/profile")
+        }
+      }catch(err){
+        console.log(err)
+    }
+  }
+  checkingStatus();
+  }, []);
+  
   
   /*
   const handleLogin = () => {
@@ -41,8 +56,7 @@ const login = () => {
       email:email, 
       password:password 
     };
-    axios
-      .post("http://192.168.219.100:3000/login", user)
+    axios.post("http://192.168.219.102:3000/login", user)
       .then((response) => {
         console.log("Login response:", response);
         const token = response.data.token;

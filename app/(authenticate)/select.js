@@ -22,7 +22,7 @@ const select = () => {
   },[])
   const updateUserGender = async () => {
     try{
-        const response = await axios.put(`http://192.168.219.100:3000/users/${userId}/gender`,{
+        const response = await axios.put(`http://192.168.219.102:3000/users/${userId}/gender`,{
             gender:option
         });
 
@@ -55,6 +55,7 @@ const select = () => {
         <Text style={{ fontSize: 16, fontWeight: "500" }}>I am a Man</Text>
         <Image
           style={{ width: 50, height: 50 }}
+         
           source={{
             uri: "https://cdn-icons-png.flaticon.com/128/12442/12442425.png",
           }}
