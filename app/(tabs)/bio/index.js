@@ -17,7 +17,7 @@ const index = () => {
   const [option, setOption] = useState("AD");
   const [description, setDescription] = useState("");
   const [activeSlide, setActiveSlide] = React.useState(0);
-  const [userId, setUserId] = useState("");
+  //const [userId, setUserId] = useState("");
   const [selectedTurnOns, setSelectedTurnOns] = useState([]);
   const [lookingOptions, setLookingOptions] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
@@ -88,6 +88,26 @@ const index = () => {
       description: "Let's Vibe and see where it goes",
     },
   ];
+  const [userId,setUserId] = useState("");
+  useEffect(() => {
+    const fetchUser = async() => {
+        const token = await AsyncStorage.getItem("auth");
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.userId;
+        setUserId(userId)
+    }
+
+    fetchUser();
+  },[])
+  const updateUserDescription = async () => {
+  try{
+    const response = await axios.put(`http://192.168.219.105:3000/users/${userId}/description`)
+  }catch(error){
+  console.log("error updating user description");
+
+  
+  }
+};
   const renderImageCarousel = ({ item }) => (
     <View
       style={{ width: "100%", justifyContent: "center", alignItems: "center" }}
@@ -231,6 +251,7 @@ const index = () => {
               // placeholderTextColor={"block"}
             />
             <Pressable
+            onPress={updateUserDescription}
               style={{
                 marginTop: "auto",
                 flexDirection: "row",
