@@ -8,20 +8,27 @@ import {
   TextInput,
   Button,
   FlatList,
+  Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Entypo, AntDesign } from "@expo/vector-icons";
 import Carousel from "react-native-snap-carousel";
-
+import "core-js/stable/atob";
+import { jwtDecode } from "jwt-decode";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 const index = () => {
   const [option, setOption] = useState("AD");
   const [description, setDescription] = useState("");
   const [activeSlide, setActiveSlide] = React.useState(0);
-  //const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState("");
   const [selectedTurnOns, setSelectedTurnOns] = useState([]);
   const [lookingOptions, setLookingOptions] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
   const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState([]);
+
+  console.log("User Id", userId);
   const profileImages = [
     {
       image:
@@ -88,26 +95,137 @@ const index = () => {
       description: "Let's Vibe and see where it goes",
     },
   ];
-  const [userId,setUserId] = useState("");
+
   useEffect(() => {
-    const fetchUser = async() => {
-        const token = await AsyncStorage.getItem("auth");
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.userId;
-        setUserId(userId)
-    }
+    const fetchUser = async () => {
+      const token = await AsyncStorage.getItem("auth");
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId;
+      setUserId(userId);
+    };
 
     fetchUser();
-  },[])
-  const updateUserDescription = async () => {
-  try{
-    const response = await axios.put(`http://192.168.219.105:3000/users/${userId}/description`)
-  }catch(error){
-  console.log("error updating user description");
+  }, []);
+  const fetchUserDescription = async () => {
+    try {
+      const response = await axios.get(
+        `http://192.168.219.103:3000/users/${userId}`
+      );
+      console.log(response.data);
+      const user = response.data;
+      setDescription(user?.user?.description);
+      setSelectedTurnOns(user?.user?.turnOns);
+    } catch (error) {
+      console.log("error fetching user description", error);
+    }
+  };
+  useEffect(() => {
+    if (userId) {
+      fetchUserDescription();
+    }
+  }, [userId]);
 
-  
+  const updateUserDescription = async () => {
+    try {
+      const response = await axios.put(
+        `http://192.168.219.103:3000/users/${userId}/description`,
+        {
+          description: description,
+        }
+      );
+      console.log(response.data);
+      if (response.status === 200) {
+        Alert.alert("Success", "Description updated");
+      }
+    } catch (error) {
+      console.log(error, "error updating user description");
+    }
+  };
+  const handleToggleTurnOn = (turnOn) => {
+    if (selectedTurnOns.includes(turnOn)) {
+    } else {
+      addTurnOn(turnOn);
+    }
+  };
+  const handleOptiuon = (lookingFor) => {
+    if(lookingOptions.includes(lookingFor)){
+      removeLookingFor(lookingFor);
+    }else{
+      addLookingFor(lookingFor);
+    }
+  };
+const addLookingFor = async (lookingFor) => {
+  try{
+    const response = await axios.put(
+      `http://192.168.219.103/${userId}/looking-for`,{
+        lookingFor: lookingFor
+      });
+      console.log(response.data);
+
+      if(response.status == 200){
+        setLookingOptions([...lookingOptions, lookingFor]);
+      }
+  }catch(error){
+    console.log("Error adding looking for", error);
+  }
+}
+const removeLookingFor = async (lookingFor) => {
+  try {
+    const response = await axios.put(
+      `http://192.168.219.103:3000/users/${userId}/looking-for/remove`,
+      {
+        lookingFor: lookingFor,
+      }
+    );
+
+    console.log(response.data); // Log the response for confirmation
+
+    // Handle success or update your app state accordingly
+    if (response.status === 200) {
+      setLookingOptions(lookingOptions.filter((item) => item !== lookingFor));
+    }
+  } catch (error) {
+    console.error("Error removing looking for:", error);
+    // Handle error scenarios
   }
 };
+const addTurnOn = async (turnOn) => {
+    try {
+      const response = await axios.put(
+        `http://192.168.219.103:3000/users/${userId}/turn-ons/add`,
+        {
+          turnOn: turnOn,
+        }
+      );
+
+      console.log(response.data);
+
+      if (response.status == 200) {
+        setSelectedTurnOns([...selectedTurnOns, turnOn]);
+      }
+    } catch (error) {
+      console.log("Error adding turn on", error);
+    }
+  };
+
+  const removeTurnOn = async (turnOn) => {
+    try {
+      const response = await axios.put(
+        `http://192.168.219.103:3000/users/${userId}/turn-ons/remove`,
+        {
+          turnOn: turnOn,
+        }
+      );
+      console.log(response.data);
+
+      if (response.status == 200) {
+        setSelectedTurnOns(selectedTurnOns.filter((item) => item !== turnOn));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const renderImageCarousel = ({ item }) => (
     <View
       style={{ width: "100%", justifyContent: "center", alignItems: "center" }}
@@ -126,6 +244,8 @@ const index = () => {
       </Text>
     </View>
   );
+  console.log("description", description);
+
   return (
     <ScrollView>
       <View>
@@ -242,6 +362,7 @@ const index = () => {
           >
             <TextInput
               value={description}
+              multiline
               onChangeText={(text) => setDescription(text)}
               style={{
                 fontFamily: "Helvetica",
@@ -251,7 +372,7 @@ const index = () => {
               // placeholderTextColor={"block"}
             />
             <Pressable
-            onPress={updateUserDescription}
+              onPress={updateUserDescription}
               style={{
                 marginTop: "auto",
                 flexDirection: "row",
@@ -324,6 +445,7 @@ const index = () => {
           <View>
             {turnons?.map((item, index) => (
               <Pressable
+                onPress={() => handleToggleTurnOn(item?.name)}
                 style={{
                   backgroundColor: "#FFFDD0",
                   padding: 10,
@@ -331,16 +453,26 @@ const index = () => {
                 }}
                 key={index}
               >
-                <View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <Text
                     style={{
                       textAlign: "center",
                       fontSize: 15,
                       fontWeight: "bold",
+                      flex: 1,
                     }}
                   >
                     {item?.name}
                   </Text>
+                  {selectedTurnOns.includes(item?.name) && (
+                    <AntDesign name="checkcircle" size={18} color="#17B169" />
+                  )}
                 </View>
                 <Text
                   style={{
@@ -362,13 +494,16 @@ const index = () => {
           <>
             <View>
               <FlatList
-                columnWrapperStyle={{justifyContent: "space-between"}}
-                numColumns={2} 
+                columnWrapperStyle={{ justifyContent: "space-between" }}
+                numColumns={2}
                 data={data}
                 renderItem={({ item }) => (
                   <Pressable
+                  onPress = {() => handleOptiuon(item?.name)}
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: lookingOptions.includes(item?.name)
+                       ? "#fd5c63"
+                       :"white",
                       padding: 16,
                       justifyContent: "center",
                       alignItems: "center",
@@ -376,26 +511,35 @@ const index = () => {
                       margin: 10,
                       borderRadius: 5,
                       borderColor: "#fd5c83",
-                      borderWidth: 0.7
+                      borderWidth:
+                      lookingOptions.includes(item?.name) ? "transparent" : 0.7,
                     }}
                   >
                     <Text
-                     style={{
-                      textAlign: "center",
-                      fontWeight: "500",
-                      fontSize: 13,
-                     }}
-                    >{item?.name}</Text>
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "500",
+                        fontSize: 13,
+                        color: lookingOptions.includes(item?.name)
+                        ? "white"
+                        :"black",
+                      }}
+                    >
+                      {item?.name}
+                    </Text>
                     <Text
-                    style ={{
-                      color: "gray",
-                      textAlign: "center",
-                      width: 140,
-                      marginTop:10,
-                      fontSize: 13,
-                    }}
-                    
-                    >{item?.description}</Text>
+                      style={{
+                        color: lookingOptions.includes(item?.name)
+                        ? "white"
+                        :"gray",
+                        textAlign: "center",
+                        width: 140,
+                        marginTop: 10,
+                        fontSize: 13,
+                      }}
+                    >
+                      {item?.description}
+                    </Text>
                   </Pressable>
                 )}
               />

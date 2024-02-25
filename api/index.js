@@ -194,7 +194,7 @@ app.put("/users/:userId/description", async (req, res) => {
 
 
 //fetch users data
-app.get("/users/:userId",async (req, req) =>{
+app.get("/users/:userId",async (req, res) =>{
   try{
     const { userId } = req.params;
 
@@ -258,4 +258,73 @@ app.put("/users/:userId/turn-ons/remove", async (req, res) => {
 });
 
   
+app.put("/users/:userId/looking-for", async (req, res) => {
+  try
+  {
 
+   const {userId} =req.params;
+   const {lookingFor} = req.body;
+   const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $addToSet:{lookingFor:lookingFor},
+    },
+    {new:true}
+   );
+   if(!user){
+    return res.status(404).json({message:"User not found"});
+   }
+
+   return res.status(200).json({message:"looking for updated successfully".user});
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating user", error });
+  }
+});
+
+
+app.put("/users/:userId/looking-for/remove", async (req, res) => {
+  try
+  {
+
+   
+   
+   const {userId} =req.params;
+   const {lookingFor} = req.body;
+   const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $pull:{lookingFor:lookingFor},
+    },
+    {new:true}
+   );
+   if(!user){
+    return res.status(404).json({message:"User not found"});
+   }
+   return res.status(200).json({message:"looking for updated successfully".user});
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating user", error });
+  }
+})
+
+app.post("/users/:userId/profile-images",async (req, res) =>{
+
+  try{
+    const {userId} = req.params;
+    const {imageUrl} = req.body;
+    const user = await User.findById(userId);
+    if(!user){
+      return res.status(404).json({message:"User not found"});
+    }
+    user.profileImages.push(imageUrl);
+
+    await user.save();
+
+    return res.status(200).json({message:"Profile image added successfully",user});
+
+  }catch(error){
+    res.status(500).json({message:"Error adding profile image",error});
+
+  }
+
+
+})
