@@ -257,30 +257,31 @@ app.put("/users/:userId/turn-ons/remove", async (req, res) => {
   }
 });
 
-  
+  //end point to add a lookingFor  for a user in the backend
 app.put("/users/:userId/looking-for", async (req, res) => {
-  try
-  {
+  try {
+    const { userId } = req.params;
+    const { lookingFor } = req.body;
 
-   const {userId} =req.params;
-   const {lookingFor} = req.body;
-   const user = await User.findByIdAndUpdate(
-    userId,
-    {
-      $addToSet:{lookingFor:lookingFor},
-    },
-    {new:true}
-   );
-   if(!user){
-    return res.status(404).json({message:"User not found"});
-   }
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { lookingFor: lookingFor },
+      },
+      { new: true }
+    );
 
-   return res.status(200).json({message:"looking for updated successfully".user});
+    if (!user) {
+      return res.status(404).json({ message: "No user" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Looking for updated succesfully".user });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating user", error });
+    res.status(500).json({ message: "Error updating looking for", error });
   }
 });
-
 
 app.put("/users/:userId/looking-for/remove", async (req, res) => {
   try
@@ -313,7 +314,7 @@ app.post("/users/:userId/profile-images",async (req, res) =>{
     const {imageUrl} = req.body;
     const user = await User.findById(userId);
     if(!user){
-      return res.status(404).json({message:"User not found"});
+      return res.status(404).json({message:"User not found"})
     }
     user.profileImages.push(imageUrl);
 

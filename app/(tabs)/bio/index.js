@@ -147,28 +147,31 @@ const index = () => {
       addTurnOn(turnOn);
     }
   };
-  const handleOptiuon = (lookingFor) => {
-    if(lookingOptions.includes(lookingFor)){
+  const handleOption = (lookingFor) => {
+    if (lookingOptions.includes(lookingFor)) {
       removeLookingFor(lookingFor);
-    }else{
+    } else {
       addLookingFor(lookingFor);
     }
   };
-const addLookingFor = async (lookingFor) => {
-  try{
-    const response = await axios.put(
-      `http://192.168.219.103/${userId}/looking-for`,{
-        lookingFor: lookingFor
-      });
+  const addLookingFor = async (lookingFor) => {
+    try {
+      const response = await axios.put(
+        `http://192.168.219.103:3000/users/${userId}/looking-for`,
+        {
+          lookingFor: lookingFor,
+        }
+      );
+
       console.log(response.data);
 
-      if(response.status == 200){
+      if (response.status == 200) {
         setLookingOptions([...lookingOptions, lookingFor]);
       }
-  }catch(error){
-    console.log("Error adding looking for", error);
-  }
-}
+    } catch (error) {
+      console.log("Error addding looking for", error);
+    }
+  };
 const removeLookingFor = async (lookingFor) => {
   try {
     const response = await axios.put(
@@ -222,7 +225,7 @@ const addTurnOn = async (turnOn) => {
         setSelectedTurnOns(selectedTurnOns.filter((item) => item !== turnOn));
       }
     } catch (error) {
-      console.log(error);
+      console.log(error,"error removing turn on");
     }
   };
 
@@ -236,11 +239,14 @@ const addTurnOn = async (turnOn) => {
           resizeMode: "cover",
           height: 290,
           borderRadius: 10,
+          transform: [{ rotate: "-5deg" }],
         }}
-        source={{ uri: item?.image }}
+        source={{ uri: item }}
       />
-      <Text style={{ postion: "absolute", top: 10, right: 10, color: "black" }}>
-        {activeSlide + 1}/{profileImages.length}
+      <Text
+        style={{ position: "absolute", top: 10, right: 10, color: "black" }}
+      >
+        {activeSlide + 1}/{images.length}
       </Text>
     </View>
   );
@@ -499,11 +505,11 @@ const addTurnOn = async (turnOn) => {
                 data={data}
                 renderItem={({ item }) => (
                   <Pressable
-                  onPress = {() => handleOptiuon(item?.name)}
+                  onPress = {() => handleOption(item?.name)}
                     style={{
                       backgroundColor: lookingOptions.includes(item?.name)
-                       ? "#fd5c63"
-                       :"white",
+                      ? "#fd5c63"
+                      : "white",
                       padding: 16,
                       justifyContent: "center",
                       alignItems: "center",
@@ -511,8 +517,7 @@ const addTurnOn = async (turnOn) => {
                       margin: 10,
                       borderRadius: 5,
                       borderColor: "#fd5c83",
-                      borderWidth:
-                      lookingOptions.includes(item?.name) ? "transparent" : 0.7,
+                      //borderWidth:  lookingOptions.includes(item?.name) ? "transparent" : 1,
                     }}
                   >
                     <Text
