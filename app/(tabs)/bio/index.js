@@ -109,12 +109,14 @@ const index = () => {
   const fetchUserDescription = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.219.103:3000/users/${userId}`
+        `http://192.168.219.102:3000/users/${userId}`
       );
       console.log(response.data);
       const user = response.data;
       setDescription(user?.user?.description);
       setSelectedTurnOns(user?.user?.turnOns);
+      setImages(user?.user.profileImages);
+      setLookingOptions(user?.user?.lookingFor);
     } catch (error) {
       console.log("error fetching user description", error);
     }
@@ -128,7 +130,7 @@ const index = () => {
   const updateUserDescription = async () => {
     try {
       const response = await axios.put(
-        `http://192.168.219.103:3000/users/${userId}/description`,
+        `http://192.168.219.102:3000/users/${userId}/description`,
         {
           description: description,
         }
@@ -157,7 +159,7 @@ const index = () => {
   const addLookingFor = async (lookingFor) => {
     try {
       const response = await axios.put(
-        `http://192.168.219.103:3000/users/${userId}/looking-for`,
+        `http://192.168.219.102:3000/users/${userId}/looking-for`,
         {
           lookingFor: lookingFor,
         }
@@ -175,7 +177,7 @@ const index = () => {
 const removeLookingFor = async (lookingFor) => {
   try {
     const response = await axios.put(
-      `http://192.168.219.103:3000/users/${userId}/looking-for/remove`,
+      `http://192.168.219.102:3000/users/${userId}/looking-for/remove`,
       {
         lookingFor: lookingFor,
       }
@@ -195,7 +197,7 @@ const removeLookingFor = async (lookingFor) => {
 const addTurnOn = async (turnOn) => {
     try {
       const response = await axios.put(
-        `http://192.168.219.103:3000/users/${userId}/turn-ons/add`,
+        `http://192.168.219.102:3000/users/${userId}/turn-ons/add`,
         {
           turnOn: turnOn,
         }
@@ -214,7 +216,7 @@ const addTurnOn = async (turnOn) => {
   const removeTurnOn = async (turnOn) => {
     try {
       const response = await axios.put(
-        `http://192.168.219.103:3000/users/${userId}/turn-ons/remove`,
+        `http://192.168.219.102:3000/users/${userId}/turn-ons/remove`,
         {
           turnOn: turnOn,
         }
@@ -252,13 +254,34 @@ const addTurnOn = async (turnOn) => {
   );
   console.log("description", description);
 
+  const handleAddImage = async () =>{
+    try{
+      const response = await axios.post(`http://192.168.219.102:3000/users/${userId}/profile-images`,{
+          imageUrl:imageUrl
+      });
+
+      console.log(response);
+
+      setImageUrl("");
+    } catch(error){
+        console.log("error",error)
+    }
+}
+const getRandomImage = () => {
+  const randomIndex = Math.floor(Math.random() * images.length);
+  return images[randomIndex]
+}
+const randomImage = getRandomImage()
+
+
+  
   return (
     <ScrollView>
       <View>
         <Image
           style={{ width: "100%", height: 200, resizeMode: "cover" }}
           source={{
-            uri: "https://static.vecteezy.com/system/resources/thumbnails/018/977/074/original/animated-backgrounds-with-liquid-motion-graphic-background-cool-moving-animation-for-your-background-free-video.jpg",
+            uri: randomImage,
           }}
         />
         <View>
@@ -409,7 +432,7 @@ const addTurnOn = async (turnOn) => {
         {option == "Photos" && (
           <View>
             <Carousel
-              data={profileImages}
+              data={images}
               renderItem={renderImageCarousel}
               sliderWidth={350}
               itemWidth={300}
@@ -436,11 +459,14 @@ const addTurnOn = async (turnOn) => {
                   color="gray"
                 />
                 <TextInput
+                  value={imageUrl}
+                 
+                  onChangeText={(text) => setImageUrl(text)}
                   style={{ color: "gray", marginVertical: 10, width: 300 }}
-                  placeholder="enter your email "
+                  placeholder="enter your image ut; "
                 />
               </View>
-              <Button style={{ marginTop: 5 }} title="Add image" />
+              <Button onPress={handleAddImage} style={{ marginTop: 5 }} title="Add image" />
             </View>
           </View>
         )}
